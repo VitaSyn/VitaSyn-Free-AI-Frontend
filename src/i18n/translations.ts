@@ -269,8 +269,8 @@ export const translations: Record<Language, Translations> = {
     languageName: 'தமிழ் (Tamil)',
 
     // Auth
-    loginTitle: 'Welcome Back',
-    loginSubtitle: 'Sign in to access your free health AI assessments',
+    loginTitle: 'Hello',
+    loginSubtitle: 'Choose a sign-in method to continue.',
     phoneNumberLabel: 'Phone number',
     phoneNumberPlaceholder: '+91 98765 43210',
     sendOtp: 'Send OTP',
@@ -545,8 +545,8 @@ export const translations: Record<Language, Translations> = {
     languageName: 'English',
 
     // Auth - Tamil
-    loginTitle: 'மீண்டும் வரவேற்கிறோம்',
-    loginSubtitle: 'உங்கள் இலவச சுகாதார AI பரிசோதனைகளை அணுக உள்நுழையவும்',
+    loginTitle: 'வணக்கம்',
+    loginSubtitle: 'தொடர உள்நுழைவு முறையைத் தேர்ந்தெடுக்கவும்.',
     phoneNumberLabel: 'தொலைபேசி எண்',
     phoneNumberPlaceholder: '+91 98765 43210',
     sendOtp: 'OTP அனுப்பு',
