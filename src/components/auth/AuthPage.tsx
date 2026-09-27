@@ -391,32 +391,32 @@ export const AuthPage: React.FC = () => {
             {mode === 'login' && (
               <div className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    {t.phoneNumberLabel}
-                  </label>
-                  <input
-                    type="tel"
-                    autoComplete="tel"
-                    value={loginInput}
-                    onChange={(e) => {
-                      setLoginInput(e.target.value);
-                      setOtpSent(false);
-                      setOtp('');
-                      setSuccess('');
-                    }}
-                    placeholder={t.phoneNumberPlaceholder}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/70 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-hidden focus:border-amber-500 transition-colors"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading || (otpSent && resendSeconds > 0)}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-lime-600 hover:from-amber-400 hover:to-lime-500 text-zinc-950 font-bold text-sm shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
-                >
-                  {loading ? <span className="animate-spin">⏳</span> : <Smartphone className="w-4 h-4" />}
-                  <span>{otpSent && resendSeconds > 0 ? `${t.resendIn} ${resendSeconds}s` : otpSent ? t.resendOtp : t.sendOtp}</span>
-                </button>
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      {t.phoneNumberLabel}
+                    </label>
+                    <input
+                      type="tel"
+                      autoComplete="tel"
+                      value={loginInput}
+                      onChange={(e) => {
+                        setLoginInput(e.target.value);
+                        setOtpSent(false);
+                        setOtp('');
+                        setSuccess('');
+                      }}
+                      placeholder={t.phoneNumberPlaceholder}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/70 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-hidden focus:border-amber-500 transition-colors"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading || (otpSent && resendSeconds > 0)}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-lime-600 hover:from-amber-400 hover:to-lime-500 text-zinc-950 font-bold text-sm shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                  >
+                    {loading ? <span className="animate-spin">⏳</span> : <Smartphone className="w-4 h-4" />}
+                    <span>{otpSent && resendSeconds > 0 ? `${t.resendIn} ${resendSeconds}s` : otpSent ? t.resendOtp : t.sendOtp}</span>
+                  </button>
                 </form>
 
                 {otpSent && (
@@ -625,13 +625,12 @@ export const AuthPage: React.FC = () => {
                   {[1, 2, 3, 4].map((s) => (
                     <div
                       key={s}
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                        forgotStep === s
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${forgotStep === s
                           ? 'bg-amber-500 text-zinc-950 ring-2 ring-amber-400/40'
                           : forgotStep > s
-                          ? 'bg-lime-500 text-zinc-950'
-                          : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
-                      }`}
+                            ? 'bg-lime-500 text-zinc-950'
+                            : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
+                        }`}
                     >
                       {forgotStep > s ? '✓' : s}
                     </div>
