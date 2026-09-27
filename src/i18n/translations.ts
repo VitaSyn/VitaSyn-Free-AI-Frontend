@@ -17,6 +17,19 @@ export interface Translations {
   // Auth
   loginTitle: string;
   loginSubtitle: string;
+  phoneNumberLabel: string;
+  phoneNumberPlaceholder: string;
+  sendOtp: string;
+  sendingOtp: string;
+  verifyOtp: string;
+  resendOtp: string;
+  resendIn: string;
+  otpSent: string;
+  signInWithGoogle: string;
+  googleSignInUnavailable: string;
+  or: string;
+  invalidPhone: string;
+  googleSignInFailed: string;
   registerTitle: string;
   registerSubtitle: string;
   nameLabel: string;
@@ -258,6 +271,19 @@ export const translations: Record<Language, Translations> = {
     // Auth
     loginTitle: 'Welcome Back',
     loginSubtitle: 'Sign in to access your free health AI assessments',
+    phoneNumberLabel: 'Phone number',
+    phoneNumberPlaceholder: '+91 98765 43210',
+    sendOtp: 'Send OTP',
+    sendingOtp: 'Sending...',
+    verifyOtp: 'Verify and sign in',
+    resendOtp: 'Resend OTP',
+    resendIn: 'Resend in',
+    otpSent: 'Verification code sent by SMS.',
+    signInWithGoogle: 'Continue with Google',
+    googleSignInUnavailable: 'Google sign-in is not configured',
+    or: 'OR',
+    invalidPhone: 'Enter a valid phone number with country code, such as +919876543210.',
+    googleSignInFailed: 'Could not complete Google sign-in. Please try again.',
     registerTitle: 'Create Account',
     registerSubtitle: 'Join VitaSyn Free AI — start your free health screening today',
     nameLabel: 'Full Name',
@@ -301,7 +327,7 @@ export const translations: Record<Language, Translations> = {
     phoneLast4Label: 'Enter the last 4 digits of your registered mobile number:',
     phoneLast4Placeholder: 'e.g. 3210',
     verifyPhoneBtn: 'Verify Mobile & Send 6-Digit OTP',
-    enterOtpLabel: 'Enter the 6-digit OTP received in your email:',
+    enterOtpLabel: 'Enter the 6-digit verification code:',
     otpPlaceholder: 'e.g. 123456',
     verifyOtpBtn: 'Verify OTP',
     newPasswordLabel: 'New Password',
@@ -311,7 +337,7 @@ export const translations: Record<Language, Translations> = {
     resetPasswordBtn: 'Update Password & Sign In',
     passwordUpdatedSuccess: 'Password updated successfully! Redirecting to login...',
     invalidMobile: 'invalid mobile number.',
-    invalidOtp: 'invalid otp.',
+    invalidOtp: 'Enter a valid 6-digit verification code.',
     userEmailNotFound: 'user with email id not found, register first.',
     userAlreadyExistsTryLogin: 'user with same email already exist, try login.',
 
@@ -521,6 +547,19 @@ export const translations: Record<Language, Translations> = {
     // Auth - Tamil
     loginTitle: 'மீண்டும் வரவேற்கிறோம்',
     loginSubtitle: 'உங்கள் இலவச சுகாதார AI பரிசோதனைகளை அணுக உள்நுழையவும்',
+    phoneNumberLabel: 'தொலைபேசி எண்',
+    phoneNumberPlaceholder: '+91 98765 43210',
+    sendOtp: 'OTP அனுப்பு',
+    sendingOtp: 'அனுப்பப்படுகிறது...',
+    verifyOtp: 'சரிபார்த்து உள்நுழையவும்',
+    resendOtp: 'OTP மீண்டும் அனுப்பு',
+    resendIn: 'மீண்டும் அனுப்ப',
+    otpSent: 'சரிபார்ப்புக் குறியீடு SMS மூலம் அனுப்பப்பட்டது.',
+    signInWithGoogle: 'Google மூலம் தொடரவும்',
+    googleSignInUnavailable: 'Google உள்நுழைவு அமைக்கப்படவில்லை',
+    or: 'அல்லது',
+    invalidPhone: '+919876543210 போன்ற நாட்டுக் குறியீட்டுடன் சரியான தொலைபேசி எண்ணை உள்ளிடவும்.',
+    googleSignInFailed: 'Google உள்நுழைவை முடிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
     registerTitle: 'கணக்கு உருவாக்கவும்',
     registerSubtitle: 'VitaSyn Free AI-ல் இணைந்து இன்றே இலவச சுகாதார பரிசோதனையைத் தொடங்குங்கள்',
     nameLabel: 'முழு பெயர்',
@@ -564,7 +603,7 @@ export const translations: Record<Language, Translations> = {
     phoneLast4Label: 'உங்கள் மொபைல் எண்ணின் கடைசி 4 இலக்கங்களை உள்ளிடவும்:',
     phoneLast4Placeholder: 'எ.கா. 3210',
     verifyPhoneBtn: 'மொபைலை சரிபார்த்து 6-இலக்க OTP அனுப்பவும்',
-    enterOtpLabel: 'மின்னஞ்சலில் பெறப்பட்ட 6-இலக்க OTP-ஐ உள்ளிடவும்:',
+    enterOtpLabel: '6 இலக்க சரிபார்ப்புக் குறியீட்டை உள்ளிடவும்:',
     otpPlaceholder: 'எ.கா. 123456',
     verifyOtpBtn: 'OTP சரிபார்க்கவும்',
     newPasswordLabel: 'புதிய கடவுச்சொல்',
@@ -574,7 +613,7 @@ export const translations: Record<Language, Translations> = {
     resetPasswordBtn: 'கடவுச்சொல்லை மாற்றி உள்நுழையவும்',
     passwordUpdatedSuccess: 'கடவுச்சொல் வெற்றிகரமாக மாற்றப்பட்டது! உள்நுழைவுக்கு செல்கிறது...',
     invalidMobile: 'தவறான மொபைல் எண்.',
-    invalidOtp: 'தவறான OTP.',
+    invalidOtp: 'சரியான 6 இலக்க சரிபார்ப்புக் குறியீட்டை உள்ளிடவும்.',
     userEmailNotFound: 'மின்னஞ்சல் கொண்ட பயனர் காணப்படவில்லை, முதலில் பதிவு செய்யவும்.',
     userAlreadyExistsTryLogin: 'இந்த மின்னஞ்சலில் ஏற்கனவே கணக்கு உள்ளது, உள்நுழைய முயற்சிக்கவும்.',
 

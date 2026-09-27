@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth as useClerkAuth } from '@clerk/react';
 
 export interface AuthUser {
   userId: string;
@@ -20,6 +21,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { signOut, isSignedIn: isClerkSignedIn } = useClerkAuth();
   const [user, setUser] = useState<AuthUser | null>(() => {
     const saved = localStorage.getItem('vitasyn_user');
     return saved ? JSON.parse(saved) : null;
@@ -44,15 +46,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [token]);
 
-  const login = (userData: AuthUser, tok: string) => {
+  const login = useCallback((userData: AuthUser, tok: string) => {
     setUser(userData);
     setToken(tok);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
-  };
+    if (isClerkSignedIn) void signOut();
+  }, [isClerkSignedIn, signOut]);
 
   return (
     <AuthContext.Provider

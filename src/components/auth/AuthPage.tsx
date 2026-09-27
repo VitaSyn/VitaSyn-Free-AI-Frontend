@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { SignInButton, useAuth as useClerkAuth, useUser } from '@clerk/react';
 import { Eye, EyeOff, LogIn, Sparkles, ExternalLink, KeyRound, Smartphone, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -10,6 +11,9 @@ type ForgotStep = 1 | 2 | 3 | 4;
 export const AuthPage: React.FC = () => {
   const { t, apiUrl, theme, toggleTheme, language, toggleLanguage } = useThemeLanguage();
   const { login } = useAuth();
+  const { getToken } = useClerkAuth();
+  const { isSignedIn, user: clerkUser } = useUser();
+  const isClerkConfigured = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
   const [mode, setMode] = useState<AuthMode>('login');
   const [forgotStep, setForgotStep] = useState<ForgotStep>(1);
@@ -21,7 +25,10 @@ export const AuthPage: React.FC = () => {
 
   // Login form
   const [loginInput, setLoginInput] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [resendSeconds, setResendSeconds] = useState(0);
+  const clerkSyncing = useRef(false);
+  const syncedClerkUser = useRef('');
 
   // Register form
   const [regName, setRegName] = useState('');
@@ -40,6 +47,43 @@ export const AuthPage: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const timer = window.setTimeout(() => setResendSeconds((seconds) => Math.max(0, seconds - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendSeconds]);
+
+  useEffect(() => {
+    if (!isSignedIn || !clerkUser || clerkSyncing.current || syncedClerkUser.current === clerkUser.id) return;
+
+    let cancelled = false;
+    clerkSyncing.current = true;
+    const exchangeClerkSession = async () => {
+      try {
+        const sessionToken = await getToken();
+        if (!sessionToken) throw new Error(t.googleSignInFailed);
+        const response = await fetch(`${apiUrl}/api/auth/google/session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionToken }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || t.googleSignInFailed);
+        if (!cancelled) {
+          syncedClerkUser.current = clerkUser.id;
+          login(data.user, data.token);
+        }
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : t.googleSignInFailed);
+      } finally {
+        clerkSyncing.current = false;
+      }
+    };
+
+    void exchangeClerkSession();
+    return () => { cancelled = true; };
+  }, [apiUrl, clerkUser, getToken, isSignedIn, login, t.googleSignInFailed]);
+
   // Switch modes
   const changeMode = (m: AuthMode) => {
     setMode(m);
@@ -56,29 +100,57 @@ export const AuthPage: React.FC = () => {
   // 1. Handle Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginInput.trim() || !loginPassword.trim()) {
-      setError(t.fillAllFields);
+    const phone = loginInput.trim().replace(/[\s().-]/g, '');
+    if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+      setError(t.invalidPhone);
+      return;
+    }
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      const res = await fetch(`${apiUrl}/api/auth/phone/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.message || t.invalidPhone);
+        return;
+      }
+      setLoginInput(phone);
+      setOtp('');
+      setOtpSent(true);
+      setResendSeconds(30);
+      setSuccess(t.otpSent);
+    } catch {
+      setError(language === 'ta' ? 'சேவையகத்துடன் இணைப்பு தோல்வியடைந்தது.' : 'Failed to connect to server. Check backend.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePhoneVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const phone = loginInput.trim().replace(/[\s().-]/g, '');
+    if (!/^\+[1-9]\d{7,14}$/.test(phone) || !/^\d{6}$/.test(otp.trim())) {
+      setError(t.invalidOtp);
       return;
     }
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${apiUrl}/api/auth/login`, {
+      const response = await fetch(`${apiUrl}/api/auth/phone/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emailOrPhone: loginInput.trim(), password: loginPassword }),
+        body: JSON.stringify({ phone, code: otp.trim() }),
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await response.json();
+      if (response.ok && data.success) {
         login(data.user, data.token);
       } else {
-        if (data.code === 'USER_NOT_FOUND') {
-          setError(t.userNotFound);
-        } else if (data.code === 'INVALID_CREDENTIAL') {
-          setError(t.invalidCredential);
-        } else {
-          setError(data.message || t.invalidCredential);
-        }
+        setError(data.message || t.invalidOtp);
       }
     } catch {
       setError(language === 'ta' ? 'சேவையகத்துடன் இணைப்பு தோல்வியடைந்தது.' : 'Failed to connect to server. Check backend.');
@@ -315,72 +387,94 @@ export const AuthPage: React.FC = () => {
               </div>
             )}
 
-            {/* 1. LOGIN FORM */}
+            {/* Phone number sign-in */}
             {mode === 'login' && (
-              <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-3">
                 <div>
                   <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    {t.emailOrPhoneLabel}
+                    {t.phoneNumberLabel}
                   </label>
                   <input
-                    type="text"
+                    type="tel"
+                    autoComplete="tel"
                     value={loginInput}
-                    onChange={(e) => setLoginInput(e.target.value)}
-                    placeholder={t.emailOrPhonePlaceholder}
+                    onChange={(e) => {
+                      setLoginInput(e.target.value);
+                      setOtpSent(false);
+                      setOtp('');
+                      setSuccess('');
+                    }}
+                    placeholder={t.phoneNumberPlaceholder}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/70 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-hidden focus:border-amber-500 transition-colors"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    {t.passwordLabel}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPass ? 'text' : 'password'}
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      placeholder={t.loginPasswordPlaceholder}
-                      className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/70 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-hidden focus:border-amber-500 transition-colors"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPass((v) => !v)}
-                      className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                    >
-                      {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => changeMode('forgot')}
-                    className="text-xs text-amber-600 dark:text-amber-400 hover:underline font-semibold"
-                  >
-                    {t.forgotPassword}
-                  </button>
-                </div>
-
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || (otpSent && resendSeconds > 0)}
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-lime-600 hover:from-amber-400 hover:to-lime-500 text-zinc-950 font-bold text-sm shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                 >
-                  {loading ? <span className="animate-spin">⏳</span> : <LogIn className="w-4 h-4" />}
-                  <span>{t.loginBtn}</span>
+                  {loading ? <span className="animate-spin">⏳</span> : <Smartphone className="w-4 h-4" />}
+                  <span>{otpSent && resendSeconds > 0 ? `${t.resendIn} ${resendSeconds}s` : otpSent ? t.resendOtp : t.sendOtp}</span>
                 </button>
+                </form>
 
-                <p className="text-center text-xs text-zinc-600 dark:text-zinc-400 pt-2">
+                {otpSent && (
+                  <form onSubmit={handlePhoneVerify} className="space-y-3 border-t border-zinc-200 dark:border-zinc-800 pt-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5" htmlFor="phone-otp">
+                        {t.enterOtpLabel}
+                      </label>
+                      <input
+                        id="phone-otp"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        placeholder={t.otpPlaceholder}
+                        maxLength={6}
+                        className="w-full px-3.5 py-2.5 text-center text-lg font-bold font-mono tracking-widest rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/70 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-hidden focus:border-amber-500 transition-colors"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={loading || otp.length !== 6}
+                      className="w-full py-3 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-sm transition-colors disabled:opacity-50"
+                    >
+                      {loading ? '...' : <><LogIn className="inline w-4 h-4 mr-2" />{t.verifyOtp}</>}
+                    </button>
+                  </form>
+                )}
+
+                <div className="flex items-center gap-3 text-[10px] font-semibold text-zinc-400">
+                  <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+                  <span>{t.or}</span>
+                  <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+                </div>
+
+                {isClerkConfigured ? (
+                  <SignInButton mode="modal">
+                    <button
+                      type="button"
+                      className="w-full py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-100 font-semibold text-sm transition-colors flex items-center justify-center gap-3"
+                    >
+                      <span aria-hidden="true" className="font-bold text-base">G</span>
+                      {t.signInWithGoogle}
+                    </button>
+                  </SignInButton>
+                ) : (
                   <button
                     type="button"
-                    onClick={() => changeMode('register')}
-                    className="text-amber-600 dark:text-amber-400 hover:underline font-semibold"
+                    disabled
+                    title={t.googleSignInUnavailable}
+                    className="w-full py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-500 font-semibold text-sm flex items-center justify-center gap-3 opacity-60 cursor-not-allowed"
                   >
-                    {t.goToRegister}
+                    <span aria-hidden="true" className="font-bold text-base">G</span>
+                    {t.googleSignInUnavailable}
                   </button>
-                </p>
-              </form>
+                )}
+              </div>
             )}
 
             {/* 2. REGISTER FORM */}
