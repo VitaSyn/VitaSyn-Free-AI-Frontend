@@ -27,6 +27,8 @@ export interface Translations {
   otpSent: string;
   signInWithGoogle: string;
   googleSignInUnavailable: string;
+  signInWithApple: string;
+  appleSignInUnavailable: string;
   or: string;
   invalidPhone: string;
   googleSignInFailed: string;
@@ -278,9 +280,11 @@ export const translations: Record<Language, Translations> = {
     verifyOtp: 'Verify and sign in',
     resendOtp: 'Resend OTP',
     resendIn: 'Resend in',
-    otpSent: 'Verification code sent by SMS.',
+    otpSent: 'Temporary verification code is active. Enter the configured code to continue.',
     signInWithGoogle: 'Continue with Google',
     googleSignInUnavailable: 'Google sign-in is not configured',
+    signInWithApple: 'Continue with Apple',
+    appleSignInUnavailable: 'Apple sign-in is not configured',
     or: 'OR',
     invalidPhone: 'Enter a valid phone number with country code, such as +919876543210.',
     googleSignInFailed: 'Could not complete Google sign-in. Please try again.',
@@ -554,9 +558,11 @@ export const translations: Record<Language, Translations> = {
     verifyOtp: 'சரிபார்த்து உள்நுழையவும்',
     resendOtp: 'OTP மீண்டும் அனுப்பு',
     resendIn: 'மீண்டும் அனுப்ப',
-    otpSent: 'சரிபார்ப்புக் குறியீடு SMS மூலம் அனுப்பப்பட்டது.',
+    otpSent: 'தற்காலிக சரிபார்ப்புக் குறியீடு செயல்பாட்டில் உள்ளது. தொடர அமைக்கப்பட்ட குறியீட்டை உள்ளிடவும்.',
     signInWithGoogle: 'Google மூலம் தொடரவும்',
     googleSignInUnavailable: 'Google உள்நுழைவு அமைக்கப்படவில்லை',
+    signInWithApple: 'Apple மூலம் தொடரவும்',
+    appleSignInUnavailable: 'Apple உள்நுழைவு அமைக்கப்படவில்லை',
     or: 'அல்லது',
     invalidPhone: '+919876543210 போன்ற நாட்டுக் குறியீட்டுடன் சரியான தொலைபேசி எண்ணை உள்ளிடவும்.',
     googleSignInFailed: 'Google உள்நுழைவை முடிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',

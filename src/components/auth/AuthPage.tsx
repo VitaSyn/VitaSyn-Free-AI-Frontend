@@ -1,12 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SignInButton, useAuth as useClerkAuth, useUser } from '@clerk/react';
 import { Eye, EyeOff, LogIn, Sparkles, ExternalLink, KeyRound, Smartphone, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { siApple } from 'simple-icons';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { BrandLogo } from '../common/BrandLogo';
 
 type AuthMode = 'login' | 'register' | 'forgot';
 type ForgotStep = 1 | 2 | 3 | 4;
+
+function normalizeLoginPhone(value: string) {
+  const phone = value.trim().replace(/[\s().-]/g, '');
+  return /^\d{10}$/.test(phone) ? `+91${phone}` : phone;
+}
 
 export const AuthPage: React.FC = () => {
   const { t, apiUrl, theme, toggleTheme, language, toggleLanguage } = useThemeLanguage();
@@ -24,7 +30,7 @@ export const AuthPage: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   // Login form
-  const [loginInput, setLoginInput] = useState('');
+  const [loginInput, setLoginInput] = useState('+91 ');
   const [otpSent, setOtpSent] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(0);
   const clerkSyncing = useRef(false);
@@ -100,7 +106,7 @@ export const AuthPage: React.FC = () => {
   // 1. Handle Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const phone = loginInput.trim().replace(/[\s().-]/g, '');
+    const phone = normalizeLoginPhone(loginInput);
     if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
       setError(t.invalidPhone);
       return;
@@ -133,7 +139,7 @@ export const AuthPage: React.FC = () => {
 
   const handlePhoneVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    const phone = loginInput.trim().replace(/[\s().-]/g, '');
+    const phone = normalizeLoginPhone(loginInput);
     if (!/^\+[1-9]\d{7,14}$/.test(phone) || !/^\d{6}$/.test(otp.trim())) {
       setError(t.invalidOtp);
       return;
@@ -357,7 +363,7 @@ export const AuthPage: React.FC = () => {
 
       {/* Main Container — the form scrolls internally so the top bar stays put */}
       <div className="flex-1 min-h-0 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto">
-        <div className="w-full max-w-md my-auto">
+        <div className={`w-full ${mode === 'login' ? 'max-w-xs' : 'max-w-md'} my-auto`}>
           {/* Header Title */}
           <div className="text-center mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-600 dark:text-amber-300 text-[11px] font-semibold mb-2">
@@ -453,27 +459,58 @@ export const AuthPage: React.FC = () => {
                   <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
                 </div>
 
-                {isClerkConfigured ? (
-                  <SignInButton mode="modal">
+                <div className="grid grid-cols-2 gap-2">
+                  {isClerkConfigured ? (
+                    <SignInButton mode="modal">
+                      <button
+                        type="button"
+                        aria-label={t.signInWithGoogle}
+                        className="flex min-w-0 w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm font-semibold text-zinc-800 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                      >
+                        <span aria-hidden="true" className="shrink-0 font-bold">G</span>
+                        <span>Google</span>
+                      </button>
+                    </SignInButton>
+                  ) : (
                     <button
                       type="button"
-                      className="w-full py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-100 font-semibold text-sm transition-colors flex items-center justify-center gap-3"
+                      disabled
+                      title={t.googleSignInUnavailable}
+                      aria-label={t.googleSignInUnavailable}
+                      className="flex min-w-0 w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm font-semibold text-zinc-500 opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-500"
                     >
-                      <span aria-hidden="true" className="font-bold text-base">G</span>
-                      {t.signInWithGoogle}
+                      <span aria-hidden="true" className="shrink-0 font-bold">G</span>
+                      <span>Google</span>
                     </button>
-                  </SignInButton>
-                ) : (
-                  <button
-                    type="button"
-                    disabled
-                    title={t.googleSignInUnavailable}
-                    className="w-full py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-500 font-semibold text-sm flex items-center justify-center gap-3 opacity-60 cursor-not-allowed"
-                  >
-                    <span aria-hidden="true" className="font-bold text-base">G</span>
-                    {t.googleSignInUnavailable}
-                  </button>
-                )}
+                  )}
+                  {isClerkConfigured ? (
+                    <SignInButton mode="modal">
+                      <button
+                        type="button"
+                        aria-label={t.signInWithApple}
+                        className="flex min-w-0 w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm font-semibold text-zinc-800 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                      >
+                        <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d={siApple.path} />
+                        </svg>
+                        <span>Apple</span>
+                      </button>
+                    </SignInButton>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      title={t.appleSignInUnavailable}
+                      aria-label={t.appleSignInUnavailable}
+                      className="flex min-w-0 w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm font-semibold text-zinc-500 opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-500"
+                    >
+                      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d={siApple.path} />
+                      </svg>
+                      <span>Apple</span>
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
@@ -626,10 +663,10 @@ export const AuthPage: React.FC = () => {
                     <div
                       key={s}
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${forgotStep === s
-                          ? 'bg-amber-500 text-zinc-950 ring-2 ring-amber-400/40'
-                          : forgotStep > s
-                            ? 'bg-lime-500 text-zinc-950'
-                            : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
+                        ? 'bg-amber-500 text-zinc-950 ring-2 ring-amber-400/40'
+                        : forgotStep > s
+                          ? 'bg-lime-500 text-zinc-950'
+                          : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
                         }`}
                     >
                       {forgotStep > s ? '✓' : s}
