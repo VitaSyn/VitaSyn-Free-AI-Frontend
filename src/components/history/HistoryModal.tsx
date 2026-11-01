@@ -18,6 +18,7 @@ import { useThemeLanguage } from '../../context/ThemeLanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { localizeReport } from '../../utils/reportTranslator';
 import { downloadReportPdf } from '../../utils/downloadReportPdf';
+import { EyeReportContent } from '../eye/EyeReportContent';
 
 interface AssessmentRecord {
   _id: string;
@@ -29,6 +30,23 @@ interface AssessmentRecord {
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   generatedReport: any;
+  eyeData?: {
+    colorStagesPassed?: number;
+    colorScore?: number;
+    acuityScore?: number;
+    leftEyeScore?: number | null;
+    rightEyeScore?: number | null;
+    bothEyesScore?: number | null;
+    screenTime?: 'below1' | '1to3' | 'above3' | null;
+    usingPhoneAtNight?: boolean;
+    eyeIrritationDuringTest?: boolean;
+    wateryEyesDuringTest?: boolean;
+    headacheAfterScreenUse?: boolean;
+    blurryVisionAfterProlongedUse?: boolean;
+    symptomCount?: number;
+    consultationLevel?: 'none' | 'recommended' | 'mandatory';
+    grade?: string;
+  };
   language: string;
   createdAt: string;
 }
@@ -76,7 +94,102 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
   });
 
   const selectedModalReport = selectedRecord
-    ? localizeReport(selectedRecord.generatedReport, language)
+    ? localizeReport(
+        selectedRecord.type === 'eye'
+          ? {
+              ...selectedRecord.generatedReport,
+              title: selectedRecord.generatedReport?.title || 'VitaSyn Eye Wellness & Vision AI Report',
+              overallScore:
+                selectedRecord.generatedReport?.overallScore ?? selectedRecord.scores.overallScore,
+              uniqueResultCode:
+                selectedRecord.generatedReport?.uniqueResultCode ||
+                selectedRecord.scores.uniqueResultCode,
+              grade:
+                selectedRecord.generatedReport?.grade ||
+                selectedRecord.eyeData?.grade ||
+                selectedRecord.scores.status,
+              colorStatus:
+                selectedRecord.generatedReport?.colorStatus ||
+                (selectedRecord.language === 'ta'
+                  ? (selectedRecord.eyeData?.colorStagesPassed ?? 0) >= 8
+                    ? 'சிறப்பான முப்பரிமாண வண்ண உணர்தல் திறன்'
+                    : (selectedRecord.eyeData?.colorStagesPassed ?? 0) >= 4
+                      ? 'நல்ல வண்ண வேறுபாடு உணர்தல் திறன்'
+                      : 'லேசான வண்ண வேறுபாடு குறைபாடு'
+                  : (selectedRecord.eyeData?.colorStagesPassed ?? 0) >= 8
+                    ? 'Superior Trichromatic Color Perception'
+                    : (selectedRecord.eyeData?.colorStagesPassed ?? 0) >= 4
+                      ? 'Good Color Differentiation'
+                      : 'Mild Hue Discrimination Difficulty'),
+              colorStagesPassed:
+                selectedRecord.generatedReport?.colorStagesPassed ??
+                selectedRecord.eyeData?.colorStagesPassed,
+              colorScore:
+                selectedRecord.generatedReport?.colorScore ?? selectedRecord.eyeData?.colorScore,
+              acuityScore:
+                selectedRecord.generatedReport?.acuityScore ?? selectedRecord.eyeData?.acuityScore,
+              maxAcuity: selectedRecord.generatedReport?.maxAcuity ?? 15,
+              leftEyeScore:
+                selectedRecord.generatedReport?.leftEyeScore ?? selectedRecord.eyeData?.leftEyeScore,
+              rightEyeScore:
+                selectedRecord.generatedReport?.rightEyeScore ?? selectedRecord.eyeData?.rightEyeScore,
+              bothEyesScore:
+                selectedRecord.generatedReport?.bothEyesScore ?? selectedRecord.eyeData?.bothEyesScore,
+              eyeMetrics: {
+                colorStagesPassed:
+                  selectedRecord.generatedReport?.eyeMetrics?.colorStagesPassed ??
+                  selectedRecord.eyeData?.colorStagesPassed,
+                colorStagesTotal: selectedRecord.generatedReport?.eyeMetrics?.colorStagesTotal ?? 10,
+                colorPoints:
+                  selectedRecord.generatedReport?.eyeMetrics?.colorPoints ??
+                  selectedRecord.eyeData?.colorScore,
+                colorPointsTotal:
+                  selectedRecord.generatedReport?.eyeMetrics?.colorPointsTotal ?? 100,
+                leftEyeScore:
+                  selectedRecord.generatedReport?.eyeMetrics?.leftEyeScore ??
+                  selectedRecord.eyeData?.leftEyeScore,
+                rightEyeScore:
+                  selectedRecord.generatedReport?.eyeMetrics?.rightEyeScore ??
+                  selectedRecord.eyeData?.rightEyeScore,
+                bothEyesScore:
+                  selectedRecord.generatedReport?.eyeMetrics?.bothEyesScore ??
+                  selectedRecord.eyeData?.bothEyesScore,
+                readingStagesPerEye:
+                  selectedRecord.generatedReport?.eyeMetrics?.readingStagesPerEye ?? 5,
+                readingStagesTotal:
+                  selectedRecord.generatedReport?.eyeMetrics?.readingStagesTotal ?? 15,
+                screenTime:
+                  selectedRecord.generatedReport?.eyeMetrics?.screenTime ??
+                  selectedRecord.eyeData?.screenTime,
+                usingPhoneAtNight:
+                  selectedRecord.generatedReport?.eyeMetrics?.usingPhoneAtNight ??
+                  selectedRecord.eyeData?.usingPhoneAtNight,
+                eyeIrritationDuringTest:
+                  selectedRecord.generatedReport?.eyeMetrics?.eyeIrritationDuringTest ??
+                  selectedRecord.eyeData?.eyeIrritationDuringTest,
+                wateryEyesDuringTest:
+                  selectedRecord.generatedReport?.eyeMetrics?.wateryEyesDuringTest ??
+                  selectedRecord.eyeData?.wateryEyesDuringTest,
+                headacheAfterScreenUse:
+                  selectedRecord.generatedReport?.eyeMetrics?.headacheAfterScreenUse ??
+                  selectedRecord.eyeData?.headacheAfterScreenUse,
+                blurryVisionAfterProlongedUse:
+                  selectedRecord.generatedReport?.eyeMetrics?.blurryVisionAfterProlongedUse ??
+                  selectedRecord.eyeData?.blurryVisionAfterProlongedUse,
+                symptomCount:
+                  selectedRecord.generatedReport?.eyeMetrics?.symptomCount ??
+                  selectedRecord.eyeData?.symptomCount,
+              },
+              consultation: selectedRecord.generatedReport?.consultation
+                ? selectedRecord.generatedReport.consultation
+                : {
+                    level: selectedRecord.eyeData?.consultationLevel ?? 'none',
+                    message: '',
+                  },
+            }
+          : selectedRecord.generatedReport,
+        language
+      )
     : null;
 
   const saveSelectedReportPdf = async () => {
@@ -240,7 +353,47 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
       {/* Detail Modal */}
       {selectedRecord && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4">
-          <div ref={reportPdfRef} data-pdf-report className="bg-white dark:bg-[#121812] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-2xl w-full max-h-[92dvh] sm:max-h-[88vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4">
+          <div
+            ref={reportPdfRef}
+            data-pdf-report
+            className={`bg-white dark:bg-[#121812] border rounded-2xl w-full max-h-[92dvh] sm:max-h-[88vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4 ${
+              selectedRecord.type === 'eye'
+                ? 'max-w-4xl border-lime-500/40 dark:border-amber-400/30'
+                : 'max-w-2xl border-zinc-200 dark:border-zinc-800'
+            }`}
+          >
+            {selectedRecord.type === 'eye' && selectedModalReport && (
+              <>
+                <EyeReportContent
+                  report={selectedModalReport}
+                  t={t}
+                  isTamil={language === 'ta'}
+                />
+                {pdfError && <p role="alert" className="text-sm text-red-700">{pdfError}</p>}
+                <div
+                  data-pdf-ignore
+                  className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800"
+                >
+                  <button
+                    onClick={saveSelectedReportPdf}
+                    disabled={isSavingPdf}
+                    className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-lime-600 to-amber-500 hover:from-lime-500 hover:to-amber-400 text-zinc-950 font-bold text-xs shadow-md shadow-lime-500/20 transition-all cursor-pointer touch-manipulation active:scale-[0.98] disabled:opacity-60"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>{isSavingPdf ? t.savingPdf : t.savePdf}</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedRecord(null)}
+                    data-pdf-ignore
+                    className="w-full sm:w-auto min-h-[44px] flex items-center justify-center px-5 py-2.5 rounded-xl bg-zinc-200 dark:bg-zinc-800 font-bold text-xs text-zinc-800 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer touch-manipulation active:scale-[0.98]"
+                  >
+                    {t.close}
+                  </button>
+                </div>
+              </>
+            )}
+            {selectedRecord.type !== 'eye' && (
+              <>
             {/* Header */}
             <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3">
               <div>
@@ -409,6 +562,8 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
                 {t.close}
               </button>
             </div>
+              </>
+            )}
           </div>
         </div>
       )}
