@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   History,
   Sparkles,
@@ -11,12 +11,13 @@ import {
   AlertTriangle,
   HelpCircle,
   Clock,
-  Printer,
+  Download,
   FileText,
 } from 'lucide-react';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { localizeReport } from '../../utils/reportTranslator';
+import { downloadReportPdf } from '../../utils/downloadReportPdf';
 
 interface AssessmentRecord {
   _id: string;
@@ -43,6 +44,9 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedRecord, setSelectedRecord] = useState<AssessmentRecord | null>(null);
   const [filter, setFilter] = useState<'all' | 'hair' | 'eye'>('all');
+  const [isSavingPdf, setIsSavingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState('');
+  const reportPdfRef = useRef<HTMLDivElement>(null);
 
   const fetchRecords = async () => {
     setLoading(true);
@@ -74,6 +78,24 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
   const selectedModalReport = selectedRecord
     ? localizeReport(selectedRecord.generatedReport, language)
     : null;
+
+  const saveSelectedReportPdf = async () => {
+    if (!selectedRecord || !reportPdfRef.current) return;
+
+    setIsSavingPdf(true);
+    setPdfError('');
+    try {
+      await downloadReportPdf(
+        reportPdfRef.current,
+        selectedRecord.scores.uniqueResultCode || `${selectedRecord.type}-assessment-report`
+      );
+    } catch (error) {
+      console.error('Could not download saved report PDF:', error);
+      setPdfError(t.pdfDownloadFailed);
+    } finally {
+      setIsSavingPdf(false);
+    }
+  };
 
   return (
     <div className="page-fit mx-auto w-full max-w-4xl">
@@ -148,7 +170,10 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
             return (
               <div
                 key={item._id}
-                onClick={() => setSelectedRecord(item)}
+                onClick={() => {
+                  setSelectedRecord(item);
+                  setPdfError('');
+                }}
                 className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-[#121812] border border-zinc-200 dark:border-zinc-800 hover:border-amber-400/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between touch-manipulation active:scale-[0.99]"
               >
                 <div>
@@ -215,7 +240,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
       {/* Detail Modal */}
       {selectedRecord && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4">
-          <div className="bg-white dark:bg-[#121812] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-2xl w-full max-h-[92dvh] sm:max-h-[88vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4">
+          <div ref={reportPdfRef} data-pdf-report className="bg-white dark:bg-[#121812] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-2xl w-full max-h-[92dvh] sm:max-h-[88vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3">
               <div>
@@ -228,6 +253,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
               </div>
               <button
                 onClick={() => setSelectedRecord(null)}
+                data-pdf-ignore
                 className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 text-sm font-bold p-2 min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 touch-manipulation"
                 aria-label="Close modal"
               >
@@ -364,17 +390,20 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
             )}
 
             {/* Modal Actions */}
-            <div className="mt-4 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+            {pdfError && <p role="alert" className="text-sm text-red-700">{pdfError}</p>}
+            <div data-pdf-ignore className="mt-4 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-2.5">
               <button
-                onClick={() => window.print()}
-                className="w-full sm:w-auto min-h-[44px] px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 font-semibold text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation active:scale-[0.98]"
+                onClick={saveSelectedReportPdf}
+                disabled={isSavingPdf}
+                className="w-full sm:w-auto min-h-[44px] px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 font-semibold text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation active:scale-[0.98] disabled:opacity-60"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>{t.printReport}</span>
+                <Download className="w-3.5 h-3.5" />
+                <span>{isSavingPdf ? t.savingPdf : t.savePdf}</span>
               </button>
 
               <button
                 onClick={() => setSelectedRecord(null)}
+                data-pdf-ignore
                 className="w-full sm:w-auto min-h-[44px] px-5 py-2 rounded-xl bg-zinc-200 dark:bg-zinc-800 font-bold text-xs text-zinc-800 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer touch-manipulation active:scale-[0.98] flex items-center justify-center"
               >
                 {t.close}

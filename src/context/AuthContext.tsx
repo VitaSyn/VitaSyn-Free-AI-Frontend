@@ -8,6 +8,7 @@ export interface AuthUser {
   phone: string;
   age: number;
   sex: string;
+  profileComplete?: boolean;
 }
 
 interface AuthContextType {

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { SignInButton, useAuth as useClerkAuth, useUser } from '@clerk/react';
+import { useAuth as useClerkAuth, useUser } from '@clerk/react';
+import { useSignIn } from '@clerk/react/legacy';
 import { Eye, EyeOff, LogIn, Sparkles, ExternalLink, KeyRound, Smartphone, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { siApple } from 'simple-icons';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
@@ -9,15 +10,36 @@ import { BrandLogo } from '../common/BrandLogo';
 type AuthMode = 'login' | 'register' | 'forgot';
 type ForgotStep = 1 | 2 | 3 | 4;
 
-function normalizeLoginPhone(value: string) {
-  const phone = value.trim().replace(/[\s().-]/g, '');
-  return /^\d{10}$/.test(phone) ? `+91${phone}` : phone;
+function isPhoneLogin(value: string) {
+  return /^\d+$/.test(value.trim());
+}
+
+function isValidLoginEmail(value: string) {
+  const email = value.trim();
+  if (email.length > 254) return false;
+  const [local, domain, ...extra] = email.split('@');
+  if (
+    extra.length > 0 ||
+    !local ||
+    local.length > 64 ||
+    local.startsWith('.') ||
+    local.endsWith('.') ||
+    local.includes('..') ||
+    !/^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+$/.test(local)
+  ) {
+    return false;
+  }
+  const labels = domain?.split('.') || [];
+  return labels.length >= 2 && labels.every(
+    (label) => label.length <= 63 && /^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/.test(label)
+  ) && (labels.at(-1)?.length || 0) >= 2;
 }
 
 export const AuthPage: React.FC = () => {
   const { t, apiUrl, theme, toggleTheme, language, toggleLanguage } = useThemeLanguage();
   const { login } = useAuth();
   const { getToken } = useClerkAuth();
+  const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   const { isSignedIn, user: clerkUser } = useUser();
   const isClerkConfigured = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
@@ -30,7 +52,7 @@ export const AuthPage: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   // Login form
-  const [loginInput, setLoginInput] = useState('+91 ');
+  const [loginInput, setLoginInput] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(0);
   const clerkSyncing = useRef(false);
@@ -67,20 +89,20 @@ export const AuthPage: React.FC = () => {
     const exchangeClerkSession = async () => {
       try {
         const sessionToken = await getToken();
-        if (!sessionToken) throw new Error(t.googleSignInFailed);
+        if (!sessionToken) throw new Error('Could not verify your social sign-in. Please try again.');
         const response = await fetch(`${apiUrl}/api/auth/google/session`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionToken }),
         });
         const data = await response.json();
-        if (!response.ok || !data.success) throw new Error(data.message || t.googleSignInFailed);
+        if (!response.ok || !data.success) throw new Error(data.message || 'Could not verify your social sign-in. Please try again.');
         if (!cancelled) {
           syncedClerkUser.current = clerkUser.id;
           login(data.user, data.token);
         }
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : t.googleSignInFailed);
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Could not verify your social sign-in. Please try again.');
       } finally {
         clerkSyncing.current = false;
       }
@@ -88,7 +110,7 @@ export const AuthPage: React.FC = () => {
 
     void exchangeClerkSession();
     return () => { cancelled = true; };
-  }, [apiUrl, clerkUser, getToken, isSignedIn, login, t.googleSignInFailed]);
+  }, [apiUrl, clerkUser, getToken, isSignedIn, login]);
 
   // Switch modes
   const changeMode = (m: AuthMode) => {
@@ -106,30 +128,37 @@ export const AuthPage: React.FC = () => {
   // 1. Handle Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const phone = normalizeLoginPhone(loginInput);
-    if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
-      setError(t.invalidPhone);
+    const identifier = loginInput.trim();
+    const isPhone = isPhoneLogin(identifier);
+    if (
+      (isPhone && !/^\d{10}$/.test(identifier)) ||
+      (!isPhone && !isValidLoginEmail(identifier))
+    ) {
+      setError(isPhone
+        ? t.invalidPhone
+        : language === 'ta' ? 'சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்.' : 'Enter a valid email address.');
       return;
     }
     setLoading(true);
     setError('');
     setSuccess('');
     try {
-      const res = await fetch(`${apiUrl}/api/auth/phone/send-otp`, {
+      const res = await fetch(`${apiUrl}/api/auth/otp/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ identifier }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setError(data.message || t.invalidPhone);
+        setError(data.message || (isPhone ? t.invalidPhone : t.invalidOtp));
         return;
       }
-      setLoginInput(phone);
       setOtp('');
       setOtpSent(true);
-      setResendSeconds(30);
-      setSuccess(t.otpSent);
+      setResendSeconds(120);
+      setSuccess(isPhone
+        ? t.otpSent
+        : language === 'ta' ? 'OTP உங்கள் மின்னஞ்சலுக்கு அனுப்பப்பட்டது.' : 'OTP sent to your email.');
     } catch {
       setError(language === 'ta' ? 'சேவையகத்துடன் இணைப்பு தோல்வியடைந்தது.' : 'Failed to connect to server. Check backend.');
     } finally {
@@ -137,20 +166,20 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-  const handlePhoneVerify = async (e: React.FormEvent) => {
+  const handleOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    const phone = normalizeLoginPhone(loginInput);
-    if (!/^\+[1-9]\d{7,14}$/.test(phone) || !/^\d{6}$/.test(otp.trim())) {
+    const identifier = loginInput.trim();
+    if (!/^\d{6}$/.test(otp.trim())) {
       setError(t.invalidOtp);
       return;
     }
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`${apiUrl}/api/auth/phone/verify-otp`, {
+      const response = await fetch(`${apiUrl}/api/auth/otp/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, code: otp.trim() }),
+        body: JSON.stringify({ identifier, code: otp.trim() }),
       });
       const data = await response.json();
       if (response.ok && data.success) {
@@ -161,6 +190,22 @@ export const AuthPage: React.FC = () => {
     } catch {
       setError(language === 'ta' ? 'சேவையகத்துடன் இணைப்பு தோல்வியடைந்தது.' : 'Failed to connect to server. Check backend.');
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSocialSignIn = async (strategy: 'oauth_google' | 'oauth_apple') => {
+    if (!isSignInLoaded) return;
+    setLoading(true);
+    setError('');
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy,
+        redirectUrl: `${window.location.origin}/sso-callback`,
+        redirectUrlComplete: window.location.origin,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start social sign-in. Please try again.');
       setLoading(false);
     }
   };
@@ -393,7 +438,7 @@ export const AuthPage: React.FC = () => {
               </div>
             )}
 
-            {/* Phone number sign-in */}
+            {/* Phone number or email sign-in */}
             {mode === 'login' && (
               <div className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-3">
@@ -402,8 +447,8 @@ export const AuthPage: React.FC = () => {
                       {t.phoneNumberLabel}
                     </label>
                     <input
-                      type="tel"
-                      autoComplete="tel"
+                      type="text"
+                      autoComplete="username"
                       value={loginInput}
                       onChange={(e) => {
                         setLoginInput(e.target.value);
@@ -417,7 +462,7 @@ export const AuthPage: React.FC = () => {
                   </div>
                   <button
                     type="submit"
-                    disabled={loading || (otpSent && resendSeconds > 0)}
+                    disabled={loading || !loginInput.trim() || (otpSent && resendSeconds > 0)}
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-lime-600 hover:from-amber-400 hover:to-lime-500 text-zinc-950 font-bold text-sm shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                   >
                     {loading ? <span className="animate-spin">⏳</span> : <Smartphone className="w-4 h-4" />}
@@ -426,13 +471,13 @@ export const AuthPage: React.FC = () => {
                 </form>
 
                 {otpSent && (
-                  <form onSubmit={handlePhoneVerify} className="space-y-3 border-t border-zinc-200 dark:border-zinc-800 pt-4">
+                  <form onSubmit={handleOtpVerify} className="space-y-3 border-t border-zinc-200 dark:border-zinc-800 pt-4">
                     <div>
-                      <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5" htmlFor="phone-otp">
+                      <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5" htmlFor="login-otp">
                         {t.enterOtpLabel}
                       </label>
                       <input
-                        id="phone-otp"
+                        id="login-otp"
                         type="text"
                         inputMode="numeric"
                         autoComplete="one-time-code"
@@ -461,16 +506,16 @@ export const AuthPage: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-2">
                   {isClerkConfigured ? (
-                    <SignInButton mode="modal">
-                      <button
-                        type="button"
-                        aria-label={t.signInWithGoogle}
-                        className="flex min-w-0 w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm font-semibold text-zinc-800 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
-                      >
-                        <span aria-hidden="true" className="shrink-0 font-bold">G</span>
-                        <span>Google</span>
-                      </button>
-                    </SignInButton>
+                    <button
+                      type="button"
+                      onClick={() => void handleSocialSignIn('oauth_google')}
+                      disabled={loading}
+                      aria-label={t.signInWithGoogle}
+                      className="flex min-w-0 w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm font-semibold text-zinc-800 transition-colors hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                      <span aria-hidden="true" className="shrink-0 font-bold">G</span>
+                      <span>Google</span>
+                    </button>
                   ) : (
                     <button
                       type="button"
@@ -484,18 +529,18 @@ export const AuthPage: React.FC = () => {
                     </button>
                   )}
                   {isClerkConfigured ? (
-                    <SignInButton mode="modal">
-                      <button
-                        type="button"
-                        aria-label={t.signInWithApple}
-                        className="flex min-w-0 w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm font-semibold text-zinc-800 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
-                      >
-                        <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                          <path d={siApple.path} />
-                        </svg>
-                        <span>Apple</span>
-                      </button>
-                    </SignInButton>
+                    <button
+                      type="button"
+                      onClick={() => void handleSocialSignIn('oauth_apple')}
+                      disabled={loading}
+                      aria-label={t.signInWithApple}
+                      className="flex min-w-0 w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm font-semibold text-zinc-800 transition-colors hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d={siApple.path} />
+                      </svg>
+                      <span>Apple</span>
+                    </button>
                   ) : (
                     <button
                       type="button"

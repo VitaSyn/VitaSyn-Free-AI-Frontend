@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Eye,
   Sparkles,
   CheckCircle2,
   AlertTriangle,
   RotateCcw,
-  Printer,
+  Download,
   HelpCircle,
   Clock,
 } from 'lucide-react';
@@ -13,6 +13,7 @@ import confetti from 'canvas-confetti';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { localizeReport } from '../../utils/reportTranslator';
+import { downloadReportPdf } from '../../utils/downloadReportPdf';
 import { PreInstructionsModal } from './PreInstructionsModal';
 import { EyePreTest } from './EyePreTest';
 import { ColorTest } from './ColorTest';
@@ -63,6 +64,8 @@ export const EyeAssessment: React.FC = () => {
   const [report, setReport] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isSavingPdf, setIsSavingPdf] = useState(false);
+  const reportPdfRef = useRef<HTMLDivElement>(null);
 
   const displayReport = useMemo(() => localizeReport(report, language), [report, language]);
 
@@ -227,6 +230,24 @@ export const EyeAssessment: React.FC = () => {
     setErrorMsg(null);
   };
 
+  const saveEyeReportPdf = async () => {
+    if (!reportPdfRef.current || !displayReport) return;
+
+    setIsSavingPdf(true);
+    setErrorMsg(null);
+    try {
+      await downloadReportPdf(
+        reportPdfRef.current,
+        displayReport.uniqueResultCode || 'eye-assessment-report'
+      );
+    } catch (error) {
+      console.error('Could not download eye report PDF:', error);
+      setErrorMsg(t.pdfDownloadFailed);
+    } finally {
+      setIsSavingPdf(false);
+    }
+  };
+
   return (
     <div className="page-fit mx-auto w-full max-w-4xl">
       {/* Compact Header Banner */}
@@ -310,8 +331,8 @@ export const EyeAssessment: React.FC = () => {
         {/* STEP 4: AI REPORT — a long document, so this region scrolls */}
         {phase === 'report' && displayReport && (
           <div className="page-fit-scroll w-full">
-            <div className="bg-white dark:bg-[#121812] border border-lime-500/40 dark:border-amber-400/30 rounded-2xl p-4 sm:p-6 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-lime-500/10 to-amber-400/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+            <div ref={reportPdfRef} data-pdf-report className="bg-white dark:bg-[#121812] border border-lime-500/40 dark:border-amber-400/30 rounded-2xl p-4 sm:p-6 shadow-lg relative overflow-hidden">
+            <div data-pdf-ignore className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-lime-500/10 to-amber-400/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
 
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
@@ -604,7 +625,7 @@ export const EyeAssessment: React.FC = () => {
             </p>
 
             {/* Actions */}
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <div data-pdf-ignore className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
               <button
                 type="button"
                 onClick={resetEyeTest}
@@ -616,11 +637,12 @@ export const EyeAssessment: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => window.print()}
+                onClick={saveEyeReportPdf}
+                disabled={isSavingPdf}
                 className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-lime-600 to-amber-500 hover:from-lime-500 hover:to-amber-400 text-zinc-950 font-bold text-xs shadow-md shadow-lime-500/20 transition-all cursor-pointer touch-manipulation active:scale-[0.98]"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>{t.printReport}</span>
+                <Download className="w-3.5 h-3.5" />
+                <span>{isSavingPdf ? t.savingPdf : t.savePdf}</span>
               </button>
             </div>
             </div>
