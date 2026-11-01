@@ -487,7 +487,10 @@ export const EyeAssessment: React.FC = () => {
 
             {/* Your questionnaire answers — every input the user gave */}
             {metrics && (
-              <div className="mt-3 p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
+              <div
+                data-pdf-answers
+                className="mt-3 p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800"
+              >
                 <div className="flex items-center justify-between mb-2.5">
                   <div className="text-[11px] uppercase font-bold text-zinc-600 dark:text-zinc-400">
                     {isTamil ? 'உங்கள் பதில்கள்' : 'Your Answers'}
@@ -497,9 +500,17 @@ export const EyeAssessment: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-xs">
+                <div
+                  data-pdf-answers-grid
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-xs"
+                >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-zinc-600 dark:text-zinc-400 truncate">{t.screenTimePrompt}</span>
+                    <span
+                      data-pdf-answer-label
+                      className="text-zinc-600 dark:text-zinc-400 truncate"
+                    >
+                      {t.screenTimePrompt}
+                    </span>
                     <span className="font-bold text-zinc-900 dark:text-zinc-100 shrink-0">
                       {metrics.screenTime ? screenTimeLabel[metrics.screenTime] : '—'}
                     </span>
@@ -517,7 +528,12 @@ export const EyeAssessment: React.FC = () => {
                     const val = metrics[key];
                     return (
                       <div key={key} className="flex items-center justify-between gap-2">
-                        <span className="text-zinc-600 dark:text-zinc-400 truncate">{label}</span>
+                        <span
+                          data-pdf-answer-label
+                          className="text-zinc-600 dark:text-zinc-400 truncate"
+                        >
+                          {label}
+                        </span>
                         <span
                           className={`font-bold shrink-0 ${val ? 'text-red-600 dark:text-red-400' : 'text-lime-600 dark:text-lime-400'}`}
                         >
