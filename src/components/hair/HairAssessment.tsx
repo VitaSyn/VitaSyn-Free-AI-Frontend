@@ -12,6 +12,13 @@ import {
   HelpCircle,
   Clock,
   Loader2,
+  Sun,
+  Camera,
+  Scissors,
+  SlidersHorizontal,
+  Hand,
+  ScanSearch,
+  Shirt,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
@@ -22,8 +29,8 @@ export const HairAssessment: React.FC = () => {
   const { t, apiUrl, language } = useThemeLanguage();
   const { token } = useAuth();
 
-  // Workflow states: 'upload' | 'verifying' | 'rejected' | 'questions' | 'analyzing' | 'report'
-  const [step, setStep] = useState<'upload' | 'verifying' | 'rejected' | 'questions' | 'analyzing' | 'report'>('upload');
+  // Workflow states: 'instructions' | 'upload' | 'verifying' | 'rejected' | 'questions' | 'analyzing' | 'report'
+  const [step, setStep] = useState<'instructions' | 'upload' | 'verifying' | 'rejected' | 'questions' | 'analyzing' | 'report'>('instructions');
 
   // Input states
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -202,7 +209,7 @@ export const HairAssessment: React.FC = () => {
     setHeadLice(false);
     setReport(null);
     setErrorMsg(null);
-    setStep('upload');
+    setStep('instructions');
   };
 
   return (
@@ -226,6 +233,89 @@ export const HairAssessment: React.FC = () => {
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>{errorMsg}</span>
         </div>
+      )}
+
+      {step === 'instructions' && (
+        <section className="h-full min-h-0 w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-6 shadow-sm">
+          <div className="page-fit-band text-center">
+            <h2 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {language === 'ta' ? 'புகைப்படம் எடுப்பதற்கு முன்' : 'Before You Take a Photo'}
+            </h2>
+            <p className="mt-1 text-[11px] sm:text-xs text-zinc-700 dark:text-zinc-300">
+              {language === 'ta'
+                ? 'தெளிவான புகைப்படத்திற்கு கீழே உள்ள வழிமுறைகளைப் பின்பற்றவும்.'
+                : 'For a clear photo, please follow these guidelines.'}
+            </p>
+          </div>
+
+          <ul className="flex-1 min-h-0 overflow-y-auto mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 content-start">
+            {[
+              {
+                icon: Sun,
+                text: language === 'ta' ? 'பிரகாசமான, சமமான ஒளியில் புகைப்படம் எடுக்கவும்.' : 'Use bright, even lighting.',
+              },
+              {
+                icon: Camera,
+                text: language === 'ta' ? 'கேமராவை நிலையாக வைத்து, தலைச்சருமத்தில் கவனம் செலுத்தவும்.' : 'Keep the camera steady and focus on the scalp.',
+              },
+              {
+                icon: Scissors,
+                text: language === 'ta' ? 'தலைச்சருமம் தெளிவாகத் தெரியும்படி தலைமுடியை மெதுவாகப் பிரிக்கவும்.' : 'Gently part the hair so the scalp is clearly visible.',
+              },
+              {
+                icon: SlidersHorizontal,
+                text: language === 'ta' ? 'வடிகட்டி, போர்ட்ரெய்ட், அழகு முறை அல்லது வேறு படத் திருத்தங்களைப் பயன்படுத்த வேண்டாம்.' : 'Avoid filters, portrait or beauty modes, and any other image editing.',
+              },
+              {
+                icon: Hand,
+                text: language === 'ta' ? 'புகைப்படம் எடுப்பதற்காக தலைச்சருமத்தில் எதையும் தடவ வேண்டாம்.' : 'Do not apply anything to the scalp to take the photo.',
+              },
+              {
+                icon: ScanSearch,
+                text: language === 'ta' ? 'குறிப்பிட்ட பகுதியில் கவலை இருந்தால், அந்தப் பகுதியைத் தெளிவாகப் படம்பிடிக்கவும்.' : 'If you are concerned about a specific area, focus on that area.',
+              },
+              {
+                icon: Shirt,
+                text: language === 'ta'
+                  ? 'தொப்பி அல்லது மூடுதலை அணிய வேண்டாம். மருத்துவ ரீதியாகத் தேவையான கட்டுகள் அல்லது மூடுதல்களை அகற்ற வேண்டாம்.'
+                  : 'Do not wear a hat or covering. Do not remove medically necessary dressings or coverings.',
+              },
+            ].map(({ icon: Icon, text }, index) => (
+              <li
+                key={text}
+                className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800"
+              >
+                <span className="w-6 h-6 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+                </span>
+                <span className="text-xs sm:text-[13px] text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                  <span className="font-bold text-zinc-900 dark:text-zinc-100">{index + 1}. </span>
+                  {text}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="page-fit-band mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25">
+            <p className="text-[11px] sm:text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+              <strong>{language === 'ta' ? 'எச்சரிக்கை: ' : 'Caution: '}</strong>
+              {language === 'ta'
+                ? 'ஒரு புகைப்படத்தால் அனைத்து தலைச்சருமம் அல்லது முடி நிலைகளையும் நம்பகமாகக் கண்டறிய முடியாது. இது வரையறுக்கப்பட்ட பார்வை மட்டுமே; நோயைக் கண்டறிவதல்ல.'
+                : 'A photo cannot reliably identify every scalp or hair condition. This provides limited observation and does not diagnose disease.'}
+            </p>
+          </div>
+
+          <div className="page-fit-band mt-3 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setStep('upload')}
+              className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-8 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-lime-600 hover:from-amber-400 hover:to-lime-500 text-zinc-950 font-bold text-sm shadow-md shadow-amber-500/20 transition-all cursor-pointer touch-manipulation active:scale-[0.98]"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>{language === 'ta' ? 'நான் ஒப்புக்கொள்கிறேன்' : 'I Agree'}</span>
+            </button>
+          </div>
+        </section>
       )}
 
       {/* STEP 1: UPLOAD & VERIFY */}
