@@ -280,6 +280,18 @@ export const HairAssessment: React.FC = () => {
                   ? 'தொப்பி அல்லது மூடுதலை அணிய வேண்டாம். மருத்துவ ரீதியாகத் தேவையான கட்டுகள் அல்லது மூடுதல்களை அகற்ற வேண்டாம்.'
                   : 'Do not wear a hat or covering. Do not remove medically necessary dressings or coverings.',
               },
+              {
+                icon: ShieldAlert,
+                text: language === 'ta'
+                  ? 'முகப் புகைப்படங்கள், அடையாள ஆவணங்கள் மற்றும் தொடர்பில்லாத தனிப்பட்ட விவரங்களைத் தவிர்க்கவும்.'
+                  : 'Avoid face photos, identity documents, and unrelated personal details.',
+              },
+              {
+                icon: AlertTriangle,
+                text: language === 'ta'
+                  ? 'தலைச்சருமத்தில் வலி, இரத்தப்போக்கு, கடுமையான அழற்சி அல்லது பரவும் தடிப்பு இருந்தால், நிபுணரின் ஆலோசனையைப் பெறவும்.'
+                  : 'If your scalp is painful, bleeding, severely inflamed, or has a spreading rash, please seek professional advice.',
+              },
             ].map(({ icon: Icon, text }, index) => (
               <li
                 key={text}
