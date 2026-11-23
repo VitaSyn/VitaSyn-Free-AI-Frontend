@@ -59,7 +59,7 @@ export const EyeSymptomForm: React.FC<EyeSymptomFormProps> = ({
     screenTime !== null && YES_NO_QUESTION_KEYS.every((key) => answers[key] !== null);
 
   return (
-    <div className="h-full w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-5 shadow-sm">
+    <div className="w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-5 shadow-sm">
       {/* Header */}
       <div className="page-fit-band border-b border-zinc-200 dark:border-zinc-800 pb-3">
         <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-50">{t.phase3Title}</h2>
@@ -86,9 +86,8 @@ export const EyeSymptomForm: React.FC<EyeSymptomFormProps> = ({
         </div>
       </div>
 
-      {/* Question grid — 1 column on phones, 2 columns from lg so 6 questions fit on one screen.
-          overflow-y-auto is a safety valve for short/narrow windows. */}
-      <div className="flex-1 min-h-0 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-x-5 gap-y-3 content-start overflow-y-auto">
+      {/* Keep questions in normal document flow so they remain reachable on short screens. */}
+      <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-x-5 gap-y-3 content-start">
         {/* Question 1: Screen time dropdown */}
         <div className="space-y-1.5">
           <label

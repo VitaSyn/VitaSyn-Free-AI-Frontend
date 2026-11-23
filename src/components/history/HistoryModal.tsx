@@ -211,9 +211,9 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
   };
 
   return (
-    <div className="page-fit mx-auto w-full max-w-4xl">
+    <div className="mx-auto w-full max-w-5xl pb-4">
       {/* Header */}
-      <div className="page-fit-band flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
         <div>
           <h1 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
             <History className="w-5 h-5 text-amber-500 shrink-0" />
@@ -224,14 +224,14 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="w-full md:w-auto flex items-center gap-2">
           {/* Filter Pills */}
-          <div className="flex items-center p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs">
+          <div className="flex-1 min-w-0 md:flex-none flex items-center p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs">
             {(['all', 'hair', 'eye'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`min-h-[34px] px-3 py-1 rounded-lg font-semibold capitalize transition-all cursor-pointer touch-manipulation ${
+                className={`min-h-[38px] flex-1 md:flex-none px-2.5 sm:px-3 py-1 rounded-lg font-semibold capitalize text-center whitespace-nowrap transition-all cursor-pointer touch-manipulation ${
                   filter === f
                     ? 'bg-amber-400/20 text-amber-700 dark:text-amber-300 shadow-xs'
                     : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
@@ -253,17 +253,16 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
         </div>
       </div>
 
-      {/* Records list — the only scrollable region on this page */}
-      <div className="page-fit-scroll">
+      <div className="w-full">
         {loading ? (
-          <div className="h-full flex flex-col items-center justify-center text-zinc-500">
+          <div className="min-h-[220px] flex flex-col items-center justify-center text-zinc-500">
             <Loader2 className="w-8 h-8 animate-spin mb-2 text-amber-500" />
             <p className="text-xs">
               {language === 'ta' ? 'பதிவுகள் ஏற்றப்படுகின்றன...' : 'Loading assessment records...'}
             </p>
           </div>
         ) : filteredRecords.length === 0 ? (
-          <div className="h-full flex items-center justify-center p-6 text-center bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl">
+          <div className="min-h-[220px] flex items-center justify-center p-6 text-center bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl">
             <div>
               <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto mb-3">
                 <History className="w-6 h-6" />
@@ -356,7 +355,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
           <div
             ref={reportPdfRef}
             data-pdf-report
-            className={`bg-white dark:bg-[#121812] border rounded-2xl w-full max-h-[92dvh] sm:max-h-[88vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4 ${
+            className={`bg-white dark:bg-[#121812] border rounded-2xl w-full max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2rem)] overflow-y-auto p-3 sm:p-5 md:p-6 shadow-2xl space-y-4 ${
               selectedRecord.type === 'eye'
                 ? 'max-w-4xl border-lime-500/40 dark:border-amber-400/30'
                 : 'max-w-2xl border-zinc-200 dark:border-zinc-800'
@@ -395,12 +394,12 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
             {selectedRecord.type !== 'eye' && (
               <>
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3">
-              <div>
+            <div className="flex items-start justify-between gap-3 border-b border-zinc-200 dark:border-zinc-800 pb-3">
+              <div className="min-w-0">
                 <span className="text-xs uppercase font-bold text-amber-600 dark:text-amber-400">
                   {selectedRecord.scores.uniqueResultCode || selectedRecord.type.toUpperCase()}
                 </span>
-                <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 break-words">
                   {selectedModalReport?.title || selectedRecord.generatedReport?.title}
                 </h2>
               </div>
@@ -415,18 +414,18 @@ export const HistoryModal: React.FC<HistoryModalProps> = () => {
             </div>
 
             {/* Score & Status banner */}
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <div>
                 <span className="text-xs text-zinc-500 uppercase font-semibold">{t.overallScore}:</span>
                 <div className="text-2xl font-black text-amber-600 dark:text-amber-400">
                   {selectedRecord.scores.overallScore}/100
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right min-w-0">
                 <span className="text-xs text-zinc-500 uppercase font-semibold">
                   {selectedRecord.type === 'hair' ? t.conditionBadge : t.eyeColorRating}:
                 </span>
-                <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 break-words">
                   {selectedModalReport?.condition || selectedModalReport?.colorStatus || selectedRecord.scores.status}
                 </div>
               </div>

@@ -15,7 +15,7 @@ export const ClosedEyePanel: React.FC<ClosedEyePanelProps> = ({ mode }) => {
   const isLeftTest = mode === 'left';
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-4 sm:p-6 rounded-2xl bg-zinc-100/80 dark:bg-zinc-900/70 border-2 border-dashed border-amber-400/40 select-none">
+    <div className="w-full min-h-[280px] flex flex-col items-center justify-center gap-4 p-4 sm:p-6 rounded-2xl bg-zinc-100/80 dark:bg-zinc-900/70 border-2 border-dashed border-amber-400/40 select-none">
       <div className="relative eye-glow-pulse">
         <svg
           viewBox="0 0 120 80"

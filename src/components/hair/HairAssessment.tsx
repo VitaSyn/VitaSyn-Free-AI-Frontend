@@ -213,7 +213,7 @@ export const HairAssessment: React.FC = () => {
   };
 
   return (
-    <div className="page-fit mx-auto w-full max-w-4xl">
+    <div className="mx-auto w-full max-w-5xl pb-4">
       {/* Compact Header Banner */}
       <div className="page-fit-band mb-2 sm:mb-3 text-center">
         <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-600 dark:text-amber-300 text-[11px] font-semibold mb-1">
@@ -236,7 +236,7 @@ export const HairAssessment: React.FC = () => {
       )}
 
       {step === 'instructions' && (
-        <section className="h-full min-h-0 w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-6 shadow-sm">
+        <section className="w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-6 shadow-sm">
           <div className="page-fit-band text-center">
             <h2 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-50">
               {language === 'ta' ? 'புகைப்படம் எடுப்பதற்கு முன்' : 'Before You Take a Photo'}
@@ -248,7 +248,7 @@ export const HairAssessment: React.FC = () => {
             </p>
           </div>
 
-          <ul className="flex-1 min-h-0 overflow-y-auto mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 content-start">
+          <ul className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 content-start">
             {[
               {
                 icon: Sun,
@@ -320,7 +320,7 @@ export const HairAssessment: React.FC = () => {
 
       {/* STEP 1: UPLOAD & VERIFY */}
       {(step === 'upload' || step === 'verifying') && (
-        <div className="h-full w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-6 shadow-sm">
+        <div className="w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-6 shadow-sm">
           <div className="page-fit-band flex items-center gap-3 mb-3">
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 font-bold text-sm shrink-0">
               1
@@ -342,7 +342,7 @@ export const HairAssessment: React.FC = () => {
           {/* Upload Dropzone */}
           <div
             onClick={triggerFileInput}
-            className={`flex-1 min-h-0 flex items-center justify-center border-2 border-dashed rounded-xl p-3 text-center cursor-pointer transition-all duration-200 touch-manipulation ${
+            className={`min-h-[240px] sm:min-h-[320px] flex items-center justify-center border-2 border-dashed rounded-xl p-3 text-center cursor-pointer transition-all duration-200 touch-manipulation ${
               imagePreview
                 ? 'border-amber-500/60 bg-amber-500/5'
                 : 'border-zinc-300 dark:border-zinc-700 hover:border-amber-500/50 hover:bg-zinc-50 dark:hover:bg-zinc-900/50'
@@ -418,7 +418,7 @@ export const HairAssessment: React.FC = () => {
 
       {/* REJECTED STATE: NOT HAIR */}
       {step === 'rejected' && (
-        <div className="h-full w-full flex flex-col items-center justify-center bg-white dark:bg-[#121812] border border-red-500/30 dark:border-red-500/20 rounded-2xl p-6 text-center shadow-md">
+        <div className="w-full flex flex-col items-center justify-center bg-white dark:bg-[#121812] border border-red-500/30 dark:border-red-500/20 rounded-2xl p-6 text-center shadow-md">
           <div className="w-14 h-14 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mb-3">
             <ShieldAlert className="w-7 h-7" />
           </div>
@@ -451,7 +451,7 @@ export const HairAssessment: React.FC = () => {
 
       {/* STEP 2: HAIR QUESTIONS */}
       {(step === 'questions' || step === 'analyzing') && (
-        <div className="h-full w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div className="w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-5 shadow-sm">
           {/* Verified Badge Header */}
           <div className="page-fit-band p-2.5 rounded-xl bg-lime-500/10 border border-lime-500/30 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -483,9 +483,8 @@ export const HairAssessment: React.FC = () => {
             </p>
           </div>
 
-          {/* Question grid — 1 column on phones, 2 columns from lg.
-              overflow-y-auto is a safety valve for short/narrow windows. */}
-          <div className="flex-1 min-h-0 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-x-5 gap-y-3 content-start overflow-y-auto">
+          {/* Question grid — 1 column on phones, 2 columns from lg. */}
+          <div className="mt-3 grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-3 content-start">
 
           {/* Question 1: Dryness */}
           <div className="space-y-1.5">
@@ -668,7 +667,7 @@ export const HairAssessment: React.FC = () => {
 
       {/* STEP 3: AI REPORT CARD — a long document, so this region scrolls */}
       {step === 'report' && displayReport && (
-        <div className="page-fit-scroll w-full">
+        <div className="w-full">
           <div className="bg-white dark:bg-[#121812] border border-amber-400/40 dark:border-lime-500/30 rounded-2xl p-4 sm:p-6 shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-amber-400/10 to-lime-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
 

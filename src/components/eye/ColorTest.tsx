@@ -81,7 +81,7 @@ export const ColorTest: React.FC<ColorTestProps> = ({ stage, onStageComplete, on
   const difficulty = Math.round((stage / COLOR_STAGE_COUNT) * 100);
 
   return (
-    <div className="h-full w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-5 shadow-sm">
+    <div className="w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-5 shadow-sm">
       {/* Header row: stage + timer */}
       <div className="page-fit-band flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-2 min-w-0">
@@ -135,9 +135,9 @@ export const ColorTest: React.FC<ColorTestProps> = ({ stage, onStageComplete, on
         </p>
       </div>
 
-      {/* 4x4 grid of 16 color tiles — sized by the height left over, stays square */}
-      <div className="flex-1 min-h-0 flex items-center justify-center">
-        <div className="h-full max-h-[min(46dvh,420px)] aspect-square max-w-full p-2 sm:p-3 bg-zinc-100 dark:bg-zinc-900/90 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-inner grid grid-cols-4 gap-2 sm:gap-2.5 touch-manipulation select-none">
+      {/* Keep the color grid square and size it to the available screen width. */}
+      <div className="my-2 flex items-center justify-center">
+        <div className="w-[min(72vw,420px)] max-w-full aspect-square p-2 sm:p-3 bg-zinc-100 dark:bg-zinc-900/90 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-inner grid grid-cols-4 gap-2 sm:gap-2.5 touch-manipulation select-none">
           {Array.from({ length: TILE_COUNT }).map((_, idx) => {
             const isTarget = idx === targetTileIndex;
             const tileL = isTarget ? Math.min(85, config.l + config.deltaL) : config.l;

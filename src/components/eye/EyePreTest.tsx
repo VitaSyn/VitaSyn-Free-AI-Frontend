@@ -49,7 +49,7 @@ export const EyePreTest: React.FC<EyePreTestProps> = ({ onStartTest }) => {
   };
 
   return (
-    <div className="h-full w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-6 shadow-sm">
+    <div className="w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-6 shadow-sm">
       {/* Intro hero */}
       <div className="page-fit-band text-center">
         <h2 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-50">
@@ -63,7 +63,7 @@ export const EyePreTest: React.FC<EyePreTestProps> = ({ onStartTest }) => {
       </div>
 
       {/* Steps preview */}
-      <div className="flex-1 min-h-0 mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 content-center">
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 content-center">
         {steps.map(({ icon: Icon, color, title, desc }, idx) => (
           <div
             key={title}

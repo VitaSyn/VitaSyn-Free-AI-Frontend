@@ -233,7 +233,7 @@ export const EyeAssessment: React.FC = () => {
   };
 
   return (
-    <div className="page-fit mx-auto w-full max-w-4xl">
+    <div className="mx-auto w-full max-w-5xl pb-4">
       {/* Compact Header Banner */}
       <div className="page-fit-band mb-2 sm:mb-3 text-center">
         <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-lime-500/15 border border-lime-500/30 text-lime-600 dark:text-lime-300 text-[11px] font-semibold mb-1">
@@ -255,8 +255,7 @@ export const EyeAssessment: React.FC = () => {
         </div>
       )}
 
-      {/* Active phase fills the remaining height */}
-      <div className="page-fit-grow min-h-0 flex">
+      <div className="mt-2 w-full">
         {/* STEP 0: SAMPLE / PRE-TEST PAGE */}
         {phase === 'pretest' && <EyePreTest onStartTest={() => setIsInstructionsOpen(true)} />}
 
@@ -314,7 +313,7 @@ export const EyeAssessment: React.FC = () => {
 
         {/* STEP 4: AI REPORT — a long document, so this region scrolls */}
         {phase === 'report' && displayReport && (
-          <div className="page-fit-scroll w-full">
+          <div className="w-full">
             <div
               ref={reportPdfRef}
               data-pdf-report

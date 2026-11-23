@@ -14,7 +14,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({ onStartHair, onStartEy
   const { user } = useAuth();
 
   return (
-    <div className="page-fit mx-auto w-full max-w-4xl">
+    <div className="mx-auto w-full max-w-5xl pb-4">
       {/* Hero Brand Section */}
       <div className="page-fit-band text-center py-1 sm:py-2">
         <div className="flex justify-center mb-2">
@@ -53,11 +53,11 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({ onStartHair, onStartEy
       </div>
 
       {/* Interactive Card Grid */}
-      <div className="flex-1 min-h-0 mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
         {/* Hair Test Card */}
         <div
           onClick={onStartHair}
-          className="group relative p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#121812] border border-amber-400/30 hover:border-amber-400 dark:hover:border-amber-400/80 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 cursor-pointer flex flex-col justify-between overflow-hidden touch-manipulation active:scale-[0.98]"
+          className="group relative min-h-[220px] sm:min-h-[240px] p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#121812] border border-amber-400/30 hover:border-amber-400 dark:hover:border-amber-400/80 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 cursor-pointer flex flex-col justify-between overflow-hidden touch-manipulation active:scale-[0.98]"
         >
           <div className="absolute top-0 right-0 w-36 h-36 bg-amber-400/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500 pointer-events-none" />
 
@@ -79,7 +79,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({ onStartHair, onStartEy
             </p>
           </div>
 
-          <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between">
+          <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80 flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform">
               <span>{t.startBtn}</span>
               <ArrowRight className="w-4 h-4" />
@@ -93,7 +93,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({ onStartHair, onStartEy
         {/* Eye Test Card */}
         <div
           onClick={onStartEye}
-          className="group relative p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#121812] border border-lime-500/30 hover:border-lime-500 dark:hover:border-lime-400/80 shadow-sm hover:shadow-xl hover:shadow-lime-500/10 transition-all duration-300 cursor-pointer flex flex-col justify-between overflow-hidden touch-manipulation active:scale-[0.98]"
+          className="group relative min-h-[220px] sm:min-h-[240px] p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#121812] border border-lime-500/30 hover:border-lime-500 dark:hover:border-lime-400/80 shadow-sm hover:shadow-xl hover:shadow-lime-500/10 transition-all duration-300 cursor-pointer flex flex-col justify-between overflow-hidden touch-manipulation active:scale-[0.98]"
         >
           <div className="absolute top-0 right-0 w-36 h-36 bg-lime-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500 pointer-events-none" />
 
@@ -115,7 +115,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({ onStartHair, onStartEy
             </p>
           </div>
 
-          <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between">
+          <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80 flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-1 text-xs font-bold text-lime-600 dark:text-lime-400 group-hover:translate-x-1 transition-transform">
               <span>{t.startBtn}</span>
               <ArrowRight className="w-4 h-4" />

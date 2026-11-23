@@ -39,7 +39,7 @@ export const ReadingTest: React.FC<ReadingTestProps> = ({ mode, stageIndex, corr
   }, [words, wordIndex]);
 
   const testPanel = (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-3 p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900/60 border-2 border-lime-500/30">
+    <div className="w-full min-h-[280px] flex flex-col items-center justify-center gap-3 p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900/60 border-2 border-lime-500/30">
       <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-lime-500/15 border border-lime-500/30 text-lime-700 dark:text-lime-300 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
         <EyeIcon className="w-3 h-3" />
         <span>{modeLabel(t, mode)}</span>
@@ -89,7 +89,7 @@ export const ReadingTest: React.FC<ReadingTestProps> = ({ mode, stageIndex, corr
   );
 
   return (
-    <div className="h-full w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-5 shadow-sm">
+    <div className="w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-5 shadow-sm">
       {/* Header */}
       <div className="page-fit-band flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-2 min-w-0">
@@ -120,8 +120,7 @@ export const ReadingTest: React.FC<ReadingTestProps> = ({ mode, stageIndex, corr
         />
       </div>
 
-      {/* Test area fills the remaining height */}
-      <div className="flex-1 min-h-0 flex flex-col gap-3">
+      <div className="mt-2 flex flex-col gap-3">
         <div className="text-center">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-400/10 border border-amber-400/20 text-[11px] sm:text-xs text-amber-700 dark:text-amber-300 font-medium">
             <Volume2 className="w-3.5 h-3.5 shrink-0" />
@@ -130,22 +129,22 @@ export const ReadingTest: React.FC<ReadingTestProps> = ({ mode, stageIndex, corr
         </div>
 
         {mode === 'both' ? (
-          <div className="flex-1 min-h-0 max-w-xl w-full mx-auto animate-slide-in-right">{testPanel}</div>
+          <div className="max-w-xl w-full mx-auto animate-slide-in-right">{testPanel}</div>
         ) : (
-          <div className="flex-1 min-h-0 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {mode === 'left' ? (
               <>
-                <div className="min-h-0 animate-slide-in-right">{testPanel}</div>
-                <div className="min-h-0 animate-slide-in-left">
+                <div className="animate-slide-in-right">{testPanel}</div>
+                <div className="animate-slide-in-left">
                   <ClosedEyePanel mode={mode} />
                 </div>
               </>
             ) : (
               <>
-                <div className="min-h-0 animate-slide-in-left">
+                <div className="animate-slide-in-left">
                   <ClosedEyePanel mode={mode} />
                 </div>
-                <div className="min-h-0 animate-slide-in-right">{testPanel}</div>
+                <div className="animate-slide-in-right">{testPanel}</div>
               </>
             )}
           </div>

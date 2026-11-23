@@ -64,7 +64,7 @@ export const EyeModeSelect: React.FC<EyeModeSelectProps> = ({ scores, onStart })
   const allDone = cards.every(({ mode }) => scores[mode] > 0);
 
   return (
-    <div className="h-full w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-6 shadow-sm">
+    <div className="w-full flex flex-col bg-white dark:bg-[#121812] border border-zinc-200 dark:border-[#273526] rounded-2xl p-4 sm:p-6 shadow-sm">
       <div className="page-fit-band text-center mb-4">
         <h2 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-50">
           {isTamil ? 'வாசிப்பு பரிசோதனை அறிமுகம்' : 'Reading Test Intro'}
@@ -77,7 +77,7 @@ export const EyeModeSelect: React.FC<EyeModeSelectProps> = ({ scores, onStart })
       </div>
 
       {/* Non-interactive showcase cards */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 sm:grid-cols-3 gap-3 content-center">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 content-center">
         {cards.map(({ mode, step, label, desc, leftOpen, rightOpen, accent, iconTint }) => {
           const Icon = modeIcon(mode);
           const done = scores[mode] > 0;

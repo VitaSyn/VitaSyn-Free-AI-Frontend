@@ -47,39 +47,9 @@
   }
 }
 
-/* ==========================================================================
-   Viewport-fit layout helpers
-   The app shell (App.tsx) gives <main> a definite height, so a .page-fit root
-   can fill exactly the space left under the header. On a laptop this keeps
-   every interactive page inside the first screen with no page-level scroll.
-   ========================================================================== */
-
-/* Root of a page: fills available height, lays out as a column */
-.page-fit {
-  height: 100%;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Fixed-height header/footer bands inside a page */
+/* Keep grouped page sections from shrinking inside flex layouts */
 .page-fit-band {
   flex: 0 0 auto;
-}
-
-/* Flexible content region: takes the leftover height */
-.page-fit-grow {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-/* Scrollable content region — the only place a page may scroll.
-   Long documents (reports) use this so the app chrome stays put. */
-.page-fit-scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 /* Touch manipulation optimization */

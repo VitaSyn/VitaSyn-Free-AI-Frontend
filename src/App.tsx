@@ -188,7 +188,7 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#fafafa] dark:bg-[#0b0f0b] text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
+    <div className="flex min-h-[100dvh] w-full bg-[#fafafa] dark:bg-[#0b0f0b] text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
       {/* ChatGPT-style Collapsible Sidebar */}
       <Sidebar
         currentTab={currentTab}
@@ -199,7 +199,7 @@ const AppContent: React.FC = () => {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
         <Header
           currentTab={currentTab}
@@ -207,8 +207,7 @@ const AppContent: React.FC = () => {
           onResetToWelcome={() => setCurrentTab('welcome')}
         />
 
-        {/* Dynamic Workspace — definite height so pages can fit the first screen */}
-        <main className="flex-1 min-h-0 overflow-hidden p-2 sm:p-3 md:p-4">
+        <main className="flex-1 min-w-0 px-3 py-4 sm:px-5 sm:py-5 lg:px-7 lg:py-6">
           {currentTab === 'welcome' && (
             <WelcomeView
               onStartHair={() => setCurrentTab('hair')}
