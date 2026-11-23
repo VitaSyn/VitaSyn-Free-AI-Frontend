@@ -46,11 +46,11 @@ export const HairAssessment: React.FC = () => {
   } | null>(null);
 
   // Questionnaire states
-  const [dryness, setDryness] = useState<'dry' | 'normal' | 'oily'>('normal');
-  const [growthRate, setGrowthRate] = useState<'fast' | 'medium' | 'slow'>('medium');
-  const [itching, setItching] = useState<boolean>(false);
-  const [dandruff, setDandruff] = useState<boolean>(false);
-  const [headLice, setHeadLice] = useState<boolean>(false);
+  const [dryness, setDryness] = useState<'dry' | 'normal' | 'oily' | null>(null);
+  const [growthRate, setGrowthRate] = useState<'fast' | 'medium' | 'slow' | null>(null);
+  const [itching, setItching] = useState<boolean | null>(null);
+  const [dandruff, setDandruff] = useState<boolean | null>(null);
+  const [headLice, setHeadLice] = useState<boolean | null>(null);
 
   // Final Generated Report
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -109,6 +109,11 @@ export const HairAssessment: React.FC = () => {
       }
 
       if (data.isHair) {
+        setDryness(null);
+        setGrowthRate(null);
+        setItching(null);
+        setDandruff(null);
+        setHeadLice(null);
         setVerificationData(data);
         setStep('questions');
       } else if (data.isHair === false) {
@@ -127,6 +132,19 @@ export const HairAssessment: React.FC = () => {
 
   // Step 2: Submit questions and generate report with AI
   const submitAnalysis = async () => {
+    if (
+      dryness === null ||
+      growthRate === null ||
+      itching === null ||
+      dandruff === null ||
+      headLice === null
+    ) {
+      setErrorMsg(language === 'ta'
+        ? 'அறிக்கையை உருவாக்குவதற்கு முன் ஐந்து கேள்விகளுக்கும் பதிலளிக்கவும்.'
+        : 'Please answer all five questions before generating your report.');
+      return;
+    }
+
     setStep('analyzing');
     setErrorMsg(null);
 
@@ -191,8 +209,13 @@ export const HairAssessment: React.FC = () => {
         throw new Error(data.message || 'Report generation failed');
       }
     } catch (err: unknown) {
-      const error = err as Error;
-      setErrorMsg(error.message || 'Analysis failed. Please check backend connection.');
+      setErrorMsg(err instanceof TypeError
+        ? language === 'ta'
+          ? 'சேவையகத்துடன் இணைக்க முடியவில்லை. பின்தள சேவையகம் இயங்குகிறதா எனச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.'
+          : `Cannot reach the backend at ${apiUrl}. Make sure the backend server is running, then try again.`
+        : err instanceof Error
+          ? err.message
+          : 'Analysis failed. Please check backend connection.');
       setStep('questions');
     }
   };
@@ -203,11 +226,11 @@ export const HairAssessment: React.FC = () => {
     setImagePreview(null);
     setDescription('');
     setVerificationData(null);
-    setDryness('normal');
-    setGrowthRate('medium');
-    setItching(false);
-    setDandruff(false);
-    setHeadLice(false);
+    setDryness(null);
+    setGrowthRate(null);
+    setItching(null);
+    setDandruff(null);
+    setHeadLice(null);
     setReport(null);
     setErrorMsg(null);
     setStep('instructions');
@@ -537,6 +560,7 @@ export const HairAssessment: React.FC = () => {
                   key={opt.key}
                   type="button"
                   onClick={() => setDryness(opt.key as 'dry' | 'normal' | 'oily')}
+                  aria-pressed={dryness === opt.key}
                   className={`min-h-[44px] py-2 px-1 sm:px-2 rounded-xl text-[11px] sm:text-xs font-semibold border transition-all text-center flex items-center justify-center cursor-pointer touch-manipulation active:scale-[0.98] ${
                     dryness === opt.key
                       ? 'bg-amber-400/20 border-amber-500 text-amber-700 dark:text-amber-300 shadow-xs'
@@ -564,6 +588,7 @@ export const HairAssessment: React.FC = () => {
                   key={opt.key}
                   type="button"
                   onClick={() => setGrowthRate(opt.key as 'fast' | 'medium' | 'slow')}
+                  aria-pressed={growthRate === opt.key}
                   className={`min-h-[44px] py-2 px-1 sm:px-2 rounded-xl text-[11px] sm:text-xs font-semibold border transition-all text-center flex items-center justify-center cursor-pointer touch-manipulation active:scale-[0.98] ${
                     growthRate === opt.key
                       ? 'bg-lime-500/20 border-lime-500 text-lime-700 dark:text-lime-300 shadow-xs'
@@ -585,8 +610,9 @@ export const HairAssessment: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setItching(true)}
+                aria-pressed={itching === true}
                 className={`min-h-[44px] py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer touch-manipulation active:scale-[0.98] flex items-center justify-center ${
-                  itching
+                  itching === true
                     ? 'bg-amber-500/20 border-amber-500 text-amber-700 dark:text-amber-300'
                     : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300'
                 }`}
@@ -596,8 +622,9 @@ export const HairAssessment: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setItching(false)}
+                aria-pressed={itching === false}
                 className={`min-h-[44px] py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer touch-manipulation active:scale-[0.98] flex items-center justify-center ${
-                  !itching
+                  itching === false
                     ? 'bg-lime-500/20 border-lime-500 text-lime-700 dark:text-lime-300'
                     : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300'
                 }`}
@@ -616,8 +643,9 @@ export const HairAssessment: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setDandruff(true)}
+                aria-pressed={dandruff === true}
                 className={`min-h-[44px] py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer touch-manipulation active:scale-[0.98] flex items-center justify-center ${
-                  dandruff
+                  dandruff === true
                     ? 'bg-amber-500/20 border-amber-500 text-amber-700 dark:text-amber-300'
                     : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300'
                 }`}
@@ -627,8 +655,9 @@ export const HairAssessment: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setDandruff(false)}
+                aria-pressed={dandruff === false}
                 className={`min-h-[44px] py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer touch-manipulation active:scale-[0.98] flex items-center justify-center ${
-                  !dandruff
+                  dandruff === false
                     ? 'bg-lime-500/20 border-lime-500 text-lime-700 dark:text-lime-300'
                     : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300'
                 }`}
@@ -647,8 +676,9 @@ export const HairAssessment: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setHeadLice(true)}
+                aria-pressed={headLice === true}
                 className={`min-h-[44px] py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer touch-manipulation active:scale-[0.98] flex items-center justify-center ${
-                  headLice
+                  headLice === true
                     ? 'bg-red-500/20 border-red-500 text-red-700 dark:text-red-300'
                     : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300'
                 }`}
@@ -658,8 +688,9 @@ export const HairAssessment: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setHeadLice(false)}
+                aria-pressed={headLice === false}
                 className={`min-h-[44px] py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer touch-manipulation active:scale-[0.98] flex items-center justify-center ${
-                  !headLice
+                  headLice === false
                     ? 'bg-lime-500/20 border-lime-500 text-lime-700 dark:text-lime-300'
                     : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300'
                 }`}
