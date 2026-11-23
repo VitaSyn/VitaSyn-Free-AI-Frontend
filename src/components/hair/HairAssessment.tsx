@@ -297,12 +297,35 @@ export const HairAssessment: React.FC = () => {
           </ul>
 
           <div className="page-fit-band mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25">
-            <p className="text-[11px] sm:text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
-              <strong>{language === 'ta' ? 'எச்சரிக்கை: ' : 'Caution: '}</strong>
-              {language === 'ta'
-                ? 'ஒரு புகைப்படத்தால் அனைத்து தலைச்சருமம் அல்லது முடி நிலைகளையும் நம்பகமாகக் கண்டறிய முடியாது. இது வரையறுக்கப்பட்ட பார்வை மட்டுமே; நோயைக் கண்டறிவதல்ல.'
-                : 'A photo cannot reliably identify every scalp or hair condition. This provides limited observation and does not diagnose disease.'}
+            <p className="text-[11px] sm:text-xs font-bold text-amber-800 dark:text-amber-200 leading-relaxed">
+              {language === 'ta' ? 'எச்சரிக்கை:' : 'Caution:'}
             </p>
+            <ul className="mt-1.5 space-y-1.5 text-[11px] sm:text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-600 dark:text-amber-400 font-bold shrink-0 leading-none mt-0.5">•</span>
+                <span>
+                  {language === 'ta'
+                    ? 'ஒரு புகைப்படத்தால் அனைத்து தலைச்சருமம் அல்லது முடி நிலைகளையும் நம்பகமாகக் கண்டறிய முடியாது.'
+                    : 'A photo cannot reliably identify every scalp or hair condition.'}
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-600 dark:text-amber-400 font-bold shrink-0 leading-none mt-0.5">•</span>
+                <span>
+                  {language === 'ta'
+                    ? 'இது வரையறுக்கப்பட்ட பார்வை மட்டுமே; நோயைக் கண்டறிவதல்ல.'
+                    : 'This provides limited observation and does not diagnose disease.'}
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-600 dark:text-amber-400 font-bold shrink-0 leading-none mt-0.5">•</span>
+                <span>
+                  {language === 'ta'
+                    ? 'உங்கள் தரவு யாருடனும் பகிரப்படாது. அது எங்களிடம் பாதுகாப்பாக இருக்கும்.'
+                    : 'Your data will not be shared to anyone. It will remain safe with us.'}
+                </span>
+              </li>
+            </ul>
           </div>
 
           <div className="page-fit-band mt-3 flex justify-center">
