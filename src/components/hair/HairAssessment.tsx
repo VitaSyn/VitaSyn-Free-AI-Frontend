@@ -6,7 +6,7 @@ import {
   Sparkles,
   ArrowRight,
   RotateCcw,
-  Printer,
+  Download,
   FileText,
   ShieldAlert,
   HelpCircle,
@@ -24,10 +24,11 @@ import confetti from 'canvas-confetti';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { localizeReport } from '../../utils/reportTranslator';
+import { downloadReportPdf } from '../../utils/downloadReportPdf';
 
 export const HairAssessment: React.FC = () => {
   const { t, apiUrl, language } = useThemeLanguage();
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
 
   // Workflow states: 'instructions' | 'upload' | 'verifying' | 'rejected' | 'questions' | 'analyzing' | 'report'
   const [step, setStep] = useState<'instructions' | 'upload' | 'verifying' | 'rejected' | 'questions' | 'analyzing' | 'report'>('instructions');
@@ -56,6 +57,8 @@ export const HairAssessment: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [report, setReport] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isSavingPdf, setIsSavingPdf] = useState(false);
+  const reportPdfRef = useRef<HTMLDivElement>(null);
 
   // Localized report ensures instant, accurate Tamil translation even on language toggles
   const displayReport = useMemo(() => localizeReport(report, language), [report, language]);
@@ -171,8 +174,12 @@ export const HairAssessment: React.FC = () => {
       });
 
       const data = await res.json();
+      if (res.status === 401) {
+        logout();
+        return;
+      }
 
-      if (data.success && data.report) {
+      if (data.success && data.report && data.assessmentId) {
         setReport(data.report);
         setStep('report');
 
@@ -206,7 +213,7 @@ export const HairAssessment: React.FC = () => {
           // ignore
         }
       } else {
-        throw new Error(data.message || 'Report generation failed');
+        throw new Error(data.message || 'The report could not be saved to past reports. Please try again.');
       }
     } catch (err: unknown) {
       setErrorMsg(err instanceof TypeError
@@ -234,6 +241,24 @@ export const HairAssessment: React.FC = () => {
     setReport(null);
     setErrorMsg(null);
     setStep('instructions');
+  };
+
+  const saveHairReportPdf = async () => {
+    if (!reportPdfRef.current || !displayReport) return;
+
+    setIsSavingPdf(true);
+    setErrorMsg(null);
+    try {
+      await downloadReportPdf(
+        reportPdfRef.current,
+        displayReport.uniqueResultCode || 'hair-assessment-report'
+      );
+    } catch (error) {
+      console.error('Could not download hair report PDF:', error);
+      setErrorMsg(t.pdfDownloadFailed);
+    } finally {
+      setIsSavingPdf(false);
+    }
   };
 
   return (
@@ -735,7 +760,11 @@ export const HairAssessment: React.FC = () => {
       {/* STEP 3: AI REPORT CARD — a long document, so this region scrolls */}
       {step === 'report' && displayReport && (
         <div className="w-full">
-          <div className="bg-white dark:bg-[#121812] border border-amber-400/40 dark:border-lime-500/30 rounded-2xl p-4 sm:p-6 shadow-lg relative overflow-hidden">
+          <div
+            ref={reportPdfRef}
+            data-pdf-report
+            className="bg-white dark:bg-[#121812] border border-amber-400/40 dark:border-lime-500/30 rounded-2xl p-4 sm:p-6 shadow-lg relative overflow-hidden"
+          >
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-amber-400/10 to-lime-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
 
             {/* Top Bar of Report */}
@@ -879,7 +908,10 @@ export const HairAssessment: React.FC = () => {
             </p>
 
             {/* Actions */}
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <div
+              data-pdf-ignore
+              className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800"
+            >
               <button
                 onClick={resetAssessment}
                 className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer touch-manipulation active:scale-[0.98]"
@@ -889,11 +921,13 @@ export const HairAssessment: React.FC = () => {
               </button>
 
               <button
-                onClick={() => window.print()}
+                type="button"
+                onClick={saveHairReportPdf}
+                disabled={isSavingPdf}
                 className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-lime-600 hover:from-amber-400 hover:to-lime-500 text-zinc-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all cursor-pointer touch-manipulation active:scale-[0.98]"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>{t.printReport}</span>
+                <Download className="w-3.5 h-3.5" />
+                <span>{isSavingPdf ? t.savingPdf : t.savePdf}</span>
               </button>
             </div>
           </div>
