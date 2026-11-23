@@ -104,23 +104,24 @@ export const HairAssessment: React.FC = () => {
       });
 
       const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || (language === 'ta' ? 'புகைப்படத்தைச் சரிபார்க்க முடியவில்லை.' : 'Could not verify the photo.'));
+      }
 
       if (data.isHair) {
         setVerificationData(data);
         setStep('questions');
-      } else {
+      } else if (data.isHair === false) {
         setVerificationData(data);
         setStep('rejected');
+      } else {
+        throw new Error(language === 'ta' ? 'சரிபார்ப்பு பதில் செல்லுபடியாகவில்லை.' : 'The verification response was invalid.');
       }
     } catch (err: unknown) {
-      console.warn('Verification fallback:', err);
-      setVerificationData({
-        isHair: true,
-        confidence: 92,
-        label: 'human hair or scalp',
-        message: 'Verified with AI visual heuristics.',
-      });
-      setStep('questions');
+      setErrorMsg(err instanceof Error
+        ? err.message
+        : language === 'ta' ? 'புகைப்படத்தைச் சரிபார்க்க முடியவில்லை.' : 'Could not verify the photo.');
+      setStep('upload');
     }
   };
 
@@ -333,8 +334,8 @@ export const HairAssessment: React.FC = () => {
                 <span className="text-amber-600 dark:text-amber-400 font-bold shrink-0 leading-none mt-0.5">•</span>
                 <span>
                   {language === 'ta'
-                    ? 'உங்கள் தரவு யாருடனும் பகிரப்படாது. அது எங்களிடம் பாதுகாப்பாக இருக்கும்.'
-                    : 'Your data will not be shared to anyone. It will remain safe with us.'}
+                    ? 'உங்கள் புகைப்படமும் மதிப்பீட்டு பதில்களும் Google Gemini API-க்கு அனுப்பப்படுகின்றன. இலவச அடுக்கில், சமர்ப்பிக்கப்பட்ட உள்ளடக்கம் Google தயாரிப்புகளை மேம்படுத்தப் பயன்படுத்தப்படலாம்; இந்த ஆப் புகைப்படத்தை உங்கள் அறிக்கையுடன் சேமிப்பதில்லை.'
+                    : 'Your photo and assessment answers are sent to the Google Gemini API. On the free tier, submitted content may be used to improve Google products; this app does not save the photo with your report.'}
                 </span>
               </li>
             </ul>
